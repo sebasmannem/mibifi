@@ -1,0 +1,12 @@
+- name: Create barman directory
+  file: path="{{item}}" state=directory owner=barman group=barman
+  with_items:
+    - "{{barman_wals}}"
+    - "{{barman_conf_dir}}"
+    - /etc/barman
+
+- name: create client folders
+  file: path="{{barman_wals}}/{{hostvars[item[0]].inventory_hostname|lower}}/{{item[1]}}" state=directory owner=barman group=barman
+  with_nested: 
+    - "{{groups['barman-clients']}}"
+    - [ 'base', 'errors', 'incoming', 'streaming', 'wals' ]

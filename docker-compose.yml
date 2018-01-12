@@ -1,0 +1,31 @@
+version: '3'
+services:
+  repo:
+    build: docker/c7_ssh
+    networks:
+      mibifidemo:
+        aliases:
+          - repo.mibifi.com
+        ipv4_address: 10.49.23.2
+  db01:
+    build: docker/c7_ssh
+    networks:
+      mibifidemo:
+        ipv4_address: 10.49.23.3
+  db02:
+    build: docker/c7_ssh
+    networks:
+      mibifidemo:
+        ipv4_address: 10.49.23.4
+  barman:
+    build: docker/c7_ssh
+    networks:
+      mibifidemo:
+        ipv4_address: 10.49.23.5
+networks:
+  mibifidemo:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.49.23.0/24

@@ -1,0 +1,19 @@
+[repo]
+repohost ansible_host=10.49.23.2
+
+[dbhosts]
+db01 ansible_host=10.49.23.3
+db02 ansible_host=10.49.23.4
+
+[repmgr:children]
+dbhosts
+
+[barman-clients:children]
+dbhosts
+
+[barman-servers]
+barman ansible_host=10.49.23.5
+
+[barman-all:children]
+barman-clients
+barman-servers

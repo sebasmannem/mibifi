@@ -1,0 +1,26 @@
+- name: pg_hba.conf
+  pg_hba:
+    databases="{{item[1]}}"
+    users=postgres
+    source="{{hostvars[item[0]].ansible_default_ipv4.address}}/32"
+    method=trust
+    dest="{{PG_ETC}}/pg_hba.conf"
+  with_nested:
+    - "{{groups['barman-servers']}}"
+    - [ replication, postgres ]
+  register: pg_hbaconf
+
+- name: wal.conf
+  template: src=wal.conf dest="{{PG_ETC}}/conf.d/wal.conf" force=no owner=postgres group=postgres
+  register: walconf
+
+- name: set wal_archive in wal.conf
+  lineinfile: dest="{{PG_ETC}}/conf.d/wal.conf" regexp='wal_level *= *' line="wal_level = 'archive'"
+  when: not walconf.changed
+
+- name: create backup.conf
+  template: src=backup.conf dest="{{PG_ETC}}/conf.d/backup.conf" owner=postgres group=postgres
+  register: backup_conf
+
+- name: reload or restart postgres
+  service: name=postgres state='{% if backup_conf.changed %}restarted{% else %}reloaded{% endif %}'

@@ -1,0 +1,10 @@
+#Usecase: create three docker containers, running ssh
+#add the ip adresses to staging/inventory.docker_testenv (see exampe staging/inventory.docker_repmgrbarman)
+#run ansible-playbook:
+#ansible-playbook repmgr.yml -i staging/inventory.docker_testenv -u root -k
+
+- hosts: repmgr
+  become: true
+  roles:
+    - repmgr
+

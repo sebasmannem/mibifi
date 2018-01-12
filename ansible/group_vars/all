@@ -1,0 +1,25 @@
+#General:
+ansible_python_interpreter: "/usr/bin/python2"
+
+#barman
+barman_conf_dir: /etc/barman/conf/barman.d
+barman_wals: /var/barman
+
+#wal
+#The number of WAL files that should be kept on a primary database server.
+#You should size it correctly. E.a. for seperate xlog disk, use 50% of disk size divided by wal_size (which is 16MB by default)
+#Value of 100 uses a minimum of 1.6 GB
+wal_keep_segments: 100
+
+#repmgr
+pg_cluster: test
+repmgr_conf: /etc/repmgr.conf
+
+#postgres
+PG_VERSION: 10
+PG_ETC: "/etc/postgres/{{PG_VERSION}}/data/"
+PG_DATA: "/var/postgres/{{PG_VERSION}}/data/"
+PG_BIN: "/usr/postgres/{{PG_VERSION}}/bin/"
+PG_LOG: "/var/log/postgres/"
+REPO_PKG: "https://download.postgresql.org/pub/repos/yum/10/redhat/rhel-7-x86_64/pgdg-centos10-10-2.noarch.rpm"
+LOCAL_REPO_URL: "http://repo.mibifi.com/pgdg10"

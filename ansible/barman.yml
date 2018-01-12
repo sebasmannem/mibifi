@@ -1,0 +1,14 @@
+- hosts: barman-all
+  become: true
+  roles:
+    - { role: ssh, ssh_src_hosts: '{{groups["barman-clients"]}}', ssh_dst_hosts: '{{groups["barman-servers"]}}', ssh_src_user: postgres, ssh_dst_user: barman }
+
+- hosts: barman-clients
+  become: true
+  roles:
+    - barman-clients
+
+- hosts: barman-servers
+  become: true
+  roles:
+    - barman-servers

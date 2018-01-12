@@ -1,0 +1,4 @@
+ssh_src_hosts: '{{play_hosts}}'
+ssh_dst_hosts: '{{play_hosts}}'
+ssh_src_user: 'postgres'
+ssh_dst_user: 'postgres'

@@ -1,0 +1,23 @@
+- name: barman.conf
+  template:
+    src=barman.conf
+    dest="/etc/barman/barman.conf"
+    owner=barman
+    group=barman
+
+- name: barman-client.conf per host
+  template:
+    src=barman-client.conf
+    dest="{{barman_conf_dir}}/{{hostvars[item].inventory_hostname|lower}}.conf"
+    owner=barman
+    group=barman
+    force=false
+  with_items: "{{groups['barman-clients']}}"
+
+- name: Switch xlog to trigger wal receive
+  become_user: barman
+  command: /usr/local/bin/barman switch-xlog all
+
+- name: Run barman cron to trigger receive-xlog
+  become_user: barman
+  command: /usr/local/bin/barman -q cron

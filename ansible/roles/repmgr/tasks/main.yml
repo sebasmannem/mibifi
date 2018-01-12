@@ -1,0 +1,6 @@
+- include: packages.yml
+- include: conf.yml
+- include: user.yml
+  when: inventory_hostname == play_hosts[0]
+- include: rebuild_standbys.yml
+  when: inventory_hostname != play_hosts[0]

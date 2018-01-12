@@ -1,0 +1,15 @@
+#sudo is needed for some ansible plays in this role
+#ip gives ip config to ansible, so that should be installed also
+- name: install package
+  package: name="sudo,iproute"
+  register: probably_docker
+
+- name: reread setup
+  setup:
+  when: probably_docker.changed
+
+- name: create repo
+  yum_repository:
+    name: pgdg10
+    description: Postgres 10 repo
+    baseurl: "{{LOCAL_REPO_URL}}"

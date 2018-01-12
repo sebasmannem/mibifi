@@ -1,0 +1,20 @@
+- name: stop service
+  service: name=postgres state=stopped
+- name: clean data
+  file: state=absent path="{{PG_DATA}}"
+
+- name: rebuild standby
+  become_user: postgres
+  shell: "{{PG_BIN}}/repmgr -h {{play_hosts[0]|lower}} -U repmgr -d repmgr -D {{PG_DATA}} -f {{repmgr_conf}} standby clone"
+
+- name: start service
+  service: name=postgres state=started
+
+#Give it some retries, since startup of standby migth be still goning on
+- name: register standby
+  become_user: postgres
+  shell: "{{PG_BIN}}/repmgr -f {{repmgr_conf}} standby register"
+  register: register_standby
+  until: register_standby.rc ==0
+  retries: 5
+  delay: 10

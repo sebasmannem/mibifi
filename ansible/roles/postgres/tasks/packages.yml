@@ -1,0 +1,5 @@
+#sudo is needed for some ansible plays in this role
+#ip gives ip config to ansible, so that should be installed also
+- name: install package
+  package: name="postgres-{{PG_VERSION}},python-psycopg2"
+  ignore_errors: yes
