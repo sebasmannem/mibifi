@@ -10,10 +10,27 @@ Basic aproach for development is that you
 
 # Step by step
 
+## initialize ssh keys
+```bash
+cd docker/c7_ssh/
+ssh-keygen -N '' -f ./id_rsa
+cd -
+```
+
 ## Start the docker containers
 
 ```bash
 docker-compose up -d
+```
+
+## enter the ansible container
+```bash
+docker exec -ti mibifi_ansible_1 /bin/bash
+```
+
+##install defaults, like ansible
+```bash
+/ansible/initiate.sh
 ```
 
 ## Change default config if needed
@@ -33,7 +50,7 @@ Look at
 * barman.yml initializes database servers as barman clients and barman server as barman server
 
 ```bash
-ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook ansible/all.yml -i ansible/staging/inventory -u root --private-key docker/c7_ssh/id_rsa
+ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook /ansible/all.yml -i /ansible/staging/inventory -u root --private-key /ansible//id_rsa
 ```
 
 # Cleanup

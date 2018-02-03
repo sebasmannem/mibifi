@@ -1,9 +1,9 @@
 [repo]
-repohost ansible_host=10.49.23.2
+repohost ansible_host=mibifi_repo_1
 
 [dbhosts]
-db01 ansible_host=10.49.23.3
-db02 ansible_host=10.49.23.4
+db01 ansible_host=mibifi_db01_1
+db02 ansible_host=mibifi_db02_1
 
 [repmgr:children]
 dbhosts
@@ -12,7 +12,7 @@ dbhosts
 dbhosts
 
 [barman-servers]
-barman ansible_host=10.49.23.5
+barman ansible_host=mibifi_barman_1
 
 [barman-all:children]
 barman-clients
