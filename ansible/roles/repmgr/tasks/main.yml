@@ -1,6 +1,6 @@
-- include: packages.yml
-- include: conf.yml
-- include: user.yml
+- include_tasks: packages.yml
+- include_tasks: conf.yml
+- include_tasks: user.yml
   when: inventory_hostname == play_hosts[0]
-- include: rebuild_standbys.yml
+- include_tasks: rebuild_standbys.yml
   when: inventory_hostname != play_hosts[0]
