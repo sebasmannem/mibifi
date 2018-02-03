@@ -45,6 +45,9 @@
 - name: sync repos to local
   command: "reposync --repoid=pgdg10 --download_path=/var/www/html"
 
+- name: create repo md
+  shell: createrepo /var/www/html/pgdg10/
+
 #This will not work for docker containers, so for those it should be un the script that is sarted by RUN 
 - name: start httpd service
   service: name="{{item}}" state=started enabled=yes
@@ -62,12 +65,6 @@
 
 - name: start httpd for docker
   command: /usr/sbin/httpd
-  when: ansible_virtualization_type == "docker"
-
-- name: start git for docker
-  become: yes
-  become_user: git
-  shell: nohup git daemon --reuseaddr --enable=receive-pack --base-path=/var/lib/git /var/lib/git &
   when: ansible_virtualization_type == "docker"
 
 - name: reload firewalld rules
