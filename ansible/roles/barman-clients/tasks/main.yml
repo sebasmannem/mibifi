@@ -1,3 +1,9 @@
 ---
 - include_tasks: packages.yml
+  tags:
+  - barman_clients
+  - packages
 - include_tasks: conf.yml
+  tags:
+  - barman_clients
+  - config

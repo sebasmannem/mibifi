@@ -2,14 +2,22 @@
 #ip gives ip config to ansible, so that should be installed also
 - name: install package
   package: name="sudo,iproute"
-  register: probably_docker
+  register: iproute_package
+  tags:
+  - packages
+  - common
 
 - name: reread setup
   setup:
-  when: probably_docker.changed
+  when: iproute.changed
+  tags:
+  - common
 
 - name: create repo
   yum_repository:
     name: pgdg10
     description: Postgres 10 repo
     baseurl: "{{LOCAL_REPO_URL}}"
+  tags:
+  - common
+  - repoclient

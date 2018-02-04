@@ -4,6 +4,10 @@
     dest="/etc/barman/barman.conf"
     owner=barman
     group=barman
+  tags:
+  - barman
+  - barman_server
+  - conf
 
 - name: barman-client.conf per host
   template:
@@ -13,11 +17,23 @@
     group=barman
     force=false
   with_items: "{{groups['barman-clients']}}"
+  tags:
+  - barman
+  - barman_server
+  - conf
 
 - name: Switch xlog to trigger wal receive
   become_user: barman
   command: /usr/local/bin/barman switch-xlog all
+  tags:
+  - barman
+  - barman_server
+  - init
 
 - name: Run barman cron to trigger receive-xlog
   become_user: barman
   command: /usr/local/bin/barman -q cron
+  tags:
+  - barman
+  - barman_server
+  - init

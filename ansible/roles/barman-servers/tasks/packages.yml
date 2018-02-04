@@ -1,5 +1,6 @@
 - name: install package
   package: name="barman,postgres-{{PG_VERSION}}-client"
-
-#- name: symlink barman executable
-#file: src=/usr/bin/barman dest=/usr/local/bin/barman state=link
+  tags:
+  - barman
+  - barman_server
+  - packages

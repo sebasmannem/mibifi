@@ -1,3 +1,7 @@
 ---
 - name: install package
   package: name=rsync
+  tags:
+  - barman
+  - barman_client
+  - packages

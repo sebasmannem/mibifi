@@ -3,10 +3,16 @@
 - name: install package
   package: name=sudo,iproute
   ignore_errors: yes
+  tags:
+  - ssh
+  - packages
 
 - name: Generate ssh keys
   user: name="{%if inventory_hostname in ssh_src_hosts %}{{ssh_src_user}}{% else %}{{ssh_dst_user}}{% endif %}" generate_ssh_key=true
   register: ssh_keys
+  tags:
+  - ssh
+  - sshkeys
 
 - name: add to authorized_keys
   authorized_key:
@@ -14,11 +20,20 @@
     key: "{{hostvars[item].ssh_keys.ssh_public_key}}"
     manage_dir: yes
   with_items: "{{play_hosts}}"
+  tags:
+  - ssh
+  - sshkeys
 
 - name: add to known_hosts
   become_user: '{% if inventory_hostname in ssh_src_hosts %}{{ssh_src_user}}{% else %}{{ssh_dst_user}}{% endif %}'
   script: add_known_hosts.sh "{{item}}"
   with_items: '[ {% for host in play_hosts %}"{{hostvars[host].inventory_hostname}}", "{{hostvars[host].ansible_default_ipv4.address}}"{% if not loop.last %}, {% endif %}{% endfor %} ]'
+  tags:
+  - ssh
+  - knownhosts
 
 - name: remove /var/run/nologin if it exists, so that normal users can login
   file: path=/var/run/nologin state=absent
+  tags:
+  - ssh
+  - nologin

@@ -1,5 +1,8 @@
 - name: update all
   yum: name='*' state=latest
+  tags:
+  - repo
+  - packages
 
 - name: install software packages
   yum: name='{{item}}' state=present
@@ -13,40 +16,45 @@
   - tar
   - procps-ng
   - rpm-sign
+  tags:
+  - repo
+  - packages
 
 #I have not done anything in this playbook on using firewalld on a docker vm
 #So don't, or prepare to fix some issues
 - name: detect firewalld
   stat: path=/usr/lib/systemd/system/firewalld.service
   register: firewalld
+  tags:
+  - repo
+  - firewall
 
 - name: install python-firewall for firewalld
   yum: name=python-firewall state=present
   when: firewalld.stat.exists
-
-#- name: create git user
-#  user: name=git home=/var/lib/git
-#
-#- name: create homedir
-#  file: dest=/var/lib/git owner=git group=git state=directory
-#
-#- name: create git projects
-#  become: true
-#  become_user: git
-#  script: init_git_projs.sh "{{item}}"
-#  with_items:
-#    - base
+  tags:
+  - repo
+  - packages
 
 - name: install remote repo's
   yum:
     name: https://download.postgresql.org/pub/repos/yum/10/redhat/rhel-7-x86_64/pgdg-centos10-10-2.noarch.rpm
     state: present
+  tags:
+  - repo
+  - packages
 
 - name: sync repos to local
   command: "reposync --repoid=pgdg10 --download_path=/var/www/html"
+  tags:
+  - repo
+  - sync
 
 - name: create repo md
   shell: createrepo /var/www/html/pgdg10/
+  tags:
+  - repo
+  - sync
 
 #This will not work for docker containers, so for those it should be un the script that is sarted by RUN 
 - name: start httpd service
@@ -55,6 +63,9 @@
     - httpd
     - git.service
   when: ansible_virtualization_type != "docker"
+  tags:
+  - repo
+  - start
 
 - name: enable http in firewalld
   firewalld: service="{{item}}" permanent=true state=enabled
@@ -62,12 +73,20 @@
     - git
     - httpd
   when: firewalld.stat.exists and ansible_virtualization_type != "docker"
+  tags:
+  - repo
+  - firewall
 
 - name: start httpd for docker
   command: /usr/sbin/httpd
   when: ansible_virtualization_type == "docker"
+  tags:
+  - repo
+  - start
 
 - name: reload firewalld rules
   service: name=firewalld state=reloaded
   when: firewalld.stat.exists and ansible_virtualization_type != "docker"
-
+  tags:
+  - repo
+  - firewall
