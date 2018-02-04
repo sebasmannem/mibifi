@@ -9,7 +9,7 @@
 
 - name: reread setup
   setup:
-  when: iproute.changed
+  when: iproute_package.changed
   tags:
   - common
 
