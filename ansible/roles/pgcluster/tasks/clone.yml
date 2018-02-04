@@ -3,8 +3,10 @@
   command: "barman blaat"
   args:
     creates: "{{PG_DATA}}/PG_VERSION"
-  register: clone_barman
   ignore_errors: true
+  notify:
+  - start postgres
+  - register standby
   tags:
   - cluster
   - clone
@@ -14,31 +16,13 @@
   command: "{{PG_BIN}}/repmgr -h {{play_hosts[0]|lower}} -U repmgr -d repmgr -f {{repmgr_conf}} standby clone"
   args:
     creates: "{{PG_DATA}}/PG_VERSION"
-  register: clone_repmgr
   ignore_errors: true
+  notify:
+  - start postgres
+  - register standby
   tags:
   - cluster
   - clone
 
-- name: start service
-  service: name=postgres state=started
-  tags:
-  - cluster
-  - clone
-  - start
-  when:
-  - clone_barman|success or clone_repmgr|success
-
-#Give it some retries, since startup of standby migth be still going on
-- name: register standby
-  become_user: postgres
-  shell: "{{PG_BIN}}/repmgr -f {{repmgr_conf}} standby register"
-  register: register_standby
-  until: register_standby.rc ==0
-  retries: 5
-  delay: 10
-  tags:
-  - cluster
-  - register
-  when:
-  - clone_barman|success or clone_repmgr|success
+- name: force all notified handlers to run at this point, not waiting for normal sync points
+  meta: flush_handlers

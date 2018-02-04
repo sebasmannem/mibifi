@@ -14,15 +14,10 @@
   tags:
   - cluster
   - initdb
-- include_tasks: replication_pgconfig.yml
+- include_tasks: pgconfig.yml
   tags:
   - cluster
   - config
-#- include_tasks: start.yml
-- include_tasks: repmgr_pgconfig.yml
-  tags:
-  - cluster
-  - repmgr
 #clone stadby if host0 was initted
 - include_tasks: clone.yml
   tags:
