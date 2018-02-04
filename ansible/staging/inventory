@@ -5,9 +5,6 @@ repohost ansible_host=mibifi_repo_1
 db01 ansible_host=mibifi_db01_1
 db02 ansible_host=mibifi_db02_1
 
-[repmgr:children]
-dbhosts
-
 [barman-clients:children]
 dbhosts
 

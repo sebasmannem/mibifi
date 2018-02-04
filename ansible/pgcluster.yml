@@ -3,8 +3,8 @@
 #run ansible-playbook:
 #ansible-playbook repmgr.yml -i staging/inventory.docker_testenv -u root -k
 
-- hosts: repmgr
+- hosts: dbhosts
   become: true
   roles:
-    - repmgr
+    - pgcluster
 

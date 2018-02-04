@@ -1,0 +1,30 @@
+- include_tasks: repmgr_config.yml
+  tags:
+  - cluster
+  - config
+#First try to clone from barman or master
+- include_tasks: clone.yml
+  tags:
+  - clone
+  - cluster
+#if clone succeeded, initdb should skip
+#so initdb host0 if clone did not work
+- include_tasks: initdb.yml
+  when: inventory_hostname == play_hosts[0]
+  tags:
+  - cluster
+  - initdb
+- include_tasks: replication_pgconfig.yml
+  tags:
+  - cluster
+  - config
+#- include_tasks: start.yml
+- include_tasks: repmgr_pgconfig.yml
+  tags:
+  - cluster
+  - repmgr
+#clone stadby if host0 was initted
+- include_tasks: clone.yml
+  tags:
+  - cluster
+  - clone

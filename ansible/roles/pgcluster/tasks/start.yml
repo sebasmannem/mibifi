@@ -1,0 +1,12 @@
+---
+- name: start service
+  service: name=postgres state=started
+  tags:
+  - cluster
+  - start
+
+#- name: start postgres
+#  become_user: postgres
+#  command: '{{PG_BIN}}/pg_ctl start -D "{{PG_DATA}}"'
+#  args:
+#    creates: /tmp/postgresql.5432.pid

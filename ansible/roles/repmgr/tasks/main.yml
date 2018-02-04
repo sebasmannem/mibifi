@@ -1,6 +1,10 @@
-- include_tasks: packages.yml
-- include_tasks: conf.yml
-- include_tasks: user.yml
-  when: inventory_hostname == play_hosts[0]
-- include_tasks: rebuild_standbys.yml
-  when: inventory_hostname != play_hosts[0]
+- name: install repmgr package and some dependencies
+  package:
+    name: "repmgr{{PG_VERSION}},rsync"
+    disable_gpg_check: true
+  tags:
+  - repmgr
+  - packages
+
+#- name: workaround repmgr binaries
+#  file: state=link path=/usr/local/bin/repmgr src=/usr/postgres/bin/repmgr

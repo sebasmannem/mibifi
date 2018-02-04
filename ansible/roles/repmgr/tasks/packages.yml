@@ -1,5 +1,0 @@
-- name: install repmgr package and some dependencies
-  package: name=repmgr,rsync
-
-#- name: workaround repmgr binaries
-#  file: state=link path=/usr/local/bin/repmgr src=/usr/postgres/bin/repmgr

@@ -1,0 +1,36 @@
+---
+- name: clone command from barman not yet implemented
+  debug:
+    msg: "clone command from barman not yet implemented"
+  tags:
+  - cluster
+  - clone
+
+- name: clone from master
+  become_user: postgres
+  command: "{{PG_BIN}}/repmgr -h {{play_hosts[0]|lower}} -U repmgr -d repmgr -f {{repmgr_conf}} standby clone"
+  args:
+    creates: "{{PG_DATA}}/PG_VERSION"
+  ignore_errors: true
+  tags:
+  - cluster
+  - clone
+
+- name: start service
+  service: name=postgres state=started
+  tags:
+  - cluster
+  - clone
+  - start
+
+#Give it some retries, since startup of standby migth be still going on
+- name: register standby
+  become_user: postgres
+  shell: "{{PG_BIN}}/repmgr -f {{repmgr_conf}} standby register"
+  register: register_standby
+  until: register_standby.rc ==0
+  retries: 5
+  delay: 10
+  tags:
+  - cluster
+  - register

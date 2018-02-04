@@ -1,0 +1,27 @@
+---
+- name: initdb
+  become_user: postgres
+  command: "{{PG_BIN}}/initdb -D '{{PG_DATA}}'"
+  args:
+    creates: "{{PG_DATA}}/PG_VERSION"
+  tags:
+  - cluster
+  - initdb
+
+- name: enable conf.d folder
+  lineinfile:
+    dest='{{PG_ETC}}/postgresql.conf'
+    line="include_dir = 'conf.d'"
+  tags:
+  - cluster
+  - config
+  - initdb
+# So that we can keep the replication settings in a different conf file.
+
+- name: Create conf.d folder
+  file: state=directory owner=postgres group=postgres mode=755 path='{{PG_ETC}}/conf.d'
+  tags:
+  - cluster
+  - config
+  - initdb
+
