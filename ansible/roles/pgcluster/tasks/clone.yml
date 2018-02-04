@@ -1,7 +1,10 @@
 ---
 - name: clone command from barman not yet implemented
-  debug:
-    msg: "clone command from barman not yet implemented"
+  command: "barman blaat"
+  args:
+    creates: "{{PG_DATA}}/PG_VERSION"
+  register: clone_barman
+  ignore_errors: true
   tags:
   - cluster
   - clone
@@ -11,6 +14,7 @@
   command: "{{PG_BIN}}/repmgr -h {{play_hosts[0]|lower}} -U repmgr -d repmgr -f {{repmgr_conf}} standby clone"
   args:
     creates: "{{PG_DATA}}/PG_VERSION"
+  register: clone_repmgr
   ignore_errors: true
   tags:
   - cluster
@@ -22,6 +26,8 @@
   - cluster
   - clone
   - start
+  when:
+  - clone_barman|success or clone_repmgr|success
 
 #Give it some retries, since startup of standby migth be still going on
 - name: register standby
@@ -34,3 +40,5 @@
   tags:
   - cluster
   - register
+  when:
+  - clone_barman|success or clone_repmgr|success

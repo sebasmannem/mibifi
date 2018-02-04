@@ -3,6 +3,12 @@
   set_fact: repmgr_id={{item.0 + 1}}
   with_indexed_items: "{{play_hosts}}"
   when: item.1 == inventory_hostname
+  tages:
+  - cluster
+  - config
 
 - name: repmgr.conf
   template: src=repmgr.conf dest="{{repmgr_conf}}" owner=postgres group=postgres
+  tags:
+  - cluster
+  - config
