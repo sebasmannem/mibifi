@@ -9,4 +9,4 @@
 #  become_user: postgres
 #  command: '{{PG_BIN}}/pg_ctl start -D "{{PG_DATA}}"'
 #  args:
-#    creates: /tmp/postgresql.5432.pid
+#    creates: "/tmp/postgresql.{{PG_PORT}}.pid"

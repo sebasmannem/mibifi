@@ -3,7 +3,7 @@
   set_fact: repmgr_id={{item.0 + 1}}
   with_indexed_items: "{{play_hosts}}"
   when: item.1 == inventory_hostname
-  tages:
+  tags:
   - cluster
   - config
 
@@ -12,3 +12,12 @@
   tags:
   - cluster
   - config
+
+- name: create pgcluster service
+  blockinfile:
+    path: /etc/sysconfig/pgsql/pg_service.conf
+    content: |
+      [pgcluster]
+      host={{play_hosts | join(",")}}
+      port={{PG_PORT}}
+    create: yes

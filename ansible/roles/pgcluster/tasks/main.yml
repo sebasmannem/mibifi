@@ -14,11 +14,16 @@
   tags:
   - cluster
   - initdb
-- include_tasks: pgconfig.yml
+- name: check cluster initted
+  stat:
+    path: "{{PG_ETC}}/PG_VERSION"
+  register: cluster_initted
+- include_tasks: pg_config.yml
+  when: cluster_initted.stat.exists
   tags:
   - cluster
   - config
-#clone stadby if host0 was initted
+#clone standby if host0 was initted
 - include_tasks: clone.yml
   tags:
   - cluster

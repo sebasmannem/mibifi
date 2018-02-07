@@ -1,0 +1,34 @@
+---
+- name: user repmgr
+  become_user: postgres
+  postgresql_user: name=repmgr role_attr_flags=SUPERUSER
+  tags:
+  - cluster
+  - repmgr
+  - pgusers
+
+- name: searchpath
+  become_user: postgres
+  shell: echo 'ALTER USER repmgr SET search_path TO "repmgr_{{pg_cluster|lower}}", "$user", public;' | "{{PG_BIN}}/psql"
+  tags:
+  - cluster
+  - setup
+  - pgusers
+
+- name: database repmgr
+  become_user: postgres
+  postgresql_db: name=repmgr owner=repmgr state=present
+  register: createrepmgrdb
+  tags:
+  - cluster
+  - repmgr
+  - db
+
+- name: register master
+  become_user: postgres
+  shell: "{{PG_BIN}}/repmgr -f {{repmgr_conf}} master register"
+  when: createrepmgrdb|changed
+  tags:
+  - cluster
+  - repmgr
+  - register

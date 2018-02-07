@@ -8,3 +8,9 @@
   tags:
   - postgres
   - packages
+
+- name: create folder /etc/sysconfig/pgsql
+  file:
+    path: /etc/sysconfig/pgsql
+    mode: 0644
+    state: directory

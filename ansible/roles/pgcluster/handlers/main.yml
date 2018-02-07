@@ -1,8 +1,8 @@
 ---
 # handlers file for ansible/roles/pgcluster
 - name: restart postgres
-  debug:
-    msg: "restart postgres"
+  command: /bin/true
+  changed_when: true
   notify:
   - stop postgres
   - start postgres
@@ -11,19 +11,19 @@
   become_user: postgres
   command: '{{PG_BIN}}/pg_ctl stop -D "{{PG_DATA}}"'
   args:
-    removes: '/tmp/.s.PGSQL.5432'
+    removes: "/tmp/.s.PGSQL.{{PG_PORT}}"
 
 - name: start postgres
   become_user: postgres
   command: '{{PG_BIN}}/pg_ctl start -D "{{PG_DATA}}"'
   args:
-    creates: '/tmp/.s.PGSQL.5432'
+    creates: "/tmp/.s.PGSQL.{{PG_PORT}}"
 
 - name: reload postgres
   become_user: postgres
   command: '{{PG_BIN}}/pg_ctl reload -D "{{PG_DATA}}"'
   args:
-    removes: '/tmp/.s.PGSQL.5432'
+    removes: "/tmp/.s.PGSQL.{{PG_PORT}}"
 
 - name: register standby
   become_user: postgres

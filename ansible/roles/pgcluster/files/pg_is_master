@@ -1,0 +1,21 @@
+#!/usr/bin/python
+import sys
+try:
+   import psycopg2
+except:
+   sys.exit(2)
+try:
+   cn=psycopg2.connect('host=localhost')
+   cur=cn.cursor()
+   cur.execute('select pg_is_in_recovery()')
+except:
+   sys.exit(3)
+try:
+   if cur.next()[0]:
+      ret=1
+   else:
+      ret=0
+except:
+   ret=4
+
+sys.exit(ret)

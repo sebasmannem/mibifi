@@ -1,6 +1,22 @@
 ---
+- name: defaults
+  template:
+    src: '10_defaults.conf'
+    dest: "{{PG_ETC}}/conf.d/10_defaults.conf"
+    owner: postgres
+    group: postgres
+  notify: restart postgres
+  tags:
+  - cluster
+  - config
+
 - name: wal.conf
-  template: src=wal.conf dest="{{PG_ETC}}/conf.d/wal.conf" force=no owner=postgres group=postgres
+  template:
+    src: 90_wal.conf
+    dest: "{{PG_ETC}}/conf.d/90_wal.conf"
+    force: no
+    owner: postgres
+    group: postgres
   register: walconf
   notify: restart postgres
   tags:
@@ -9,7 +25,7 @@
   - wal
 
 - name: set wal_archive in wal.conf
-  lineinfile: dest="{{PG_ETC}}/conf.d/wal.conf" regexp="^ *wal_log_hints *=" line="wal_log_hints = on"
+  lineinfile: dest="{{PG_ETC}}/conf.d/90_wal.conf" regexp="^ *wal_log_hints *=" line="wal_log_hints = on"
   when: not walconf.changed
   notify: restart postgres
   tags:
@@ -17,7 +33,7 @@
   - config
   - wal
 
-- name: set wal_archive in wal.conf
+- name: set wal_archive in 90_wal.conf
   lineinfile: dest="{{PG_ETC}}/conf.d/wal.conf" regexp="^ *wal_keep_segments *=" line="wal_keep_segments = {{wal_keep_segments}}"
   when: not walconf.changed and PG_VERSION != 9.6
   notify: restart postgres
@@ -42,53 +58,22 @@
   - cluster
   - pg_hba
 
-- name: start postgres
-  debug:
-    msg: 'start postgres'
+- name: notify start postgres
+  command: /bin/true
+  changed_when: true
   notify: start postgres
 
 - name: force all notified handlers to run at this point, not waiting for normal sync points
   meta: flush_handlers
 
 - name: check is_master
-  command: 'Not yet implemented'
-  register: is_master
+  become_user: postgres
+  script: pg_is_master
+  register: pg_is_master
+  failed_when: pg_is_master.rc > 1
   tags:
   - cluster
   - setup
 
-- name: user repmgr
-  become_user: postgres
-  postgresql_user: name=repmgr role_attr_flags=SUPERUSER
-  when: is_master.rc = 0
-  tags:
-  - cluster
-  - repmgr
-  - pgusers
-
-- name: searchpath
-  become_user: postgres
-  shell: echo 'ALTER USER repmgr SET search_path TO "repmgr_{{pg_cluster|lower}}", "$user", public;' | /usr/local/bin/psql
-  tags:
-  - cluster
-  - setup
-  - pgusers
-
-- name: database repmgr
-  become_user: postgres
-  postgresql_db: name=repmgr owner=repmgr state="{{item}}"
-  with_items:
-    - absent
-    - present
-  tags:
-  - cluster
-  - repmgr
-  - db
-
-- name: register master
-  become_user: postgres
-  shell: "{{PG_BIN}}/repmgr -f {{repmgr_conf}} master register"
-  tags:
-  - cluster
-  - repmgr
-  - register
+- include_tasks: pg_repmgr_config.yml
+  when: pg_is_master.rc = 0

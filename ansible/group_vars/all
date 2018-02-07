@@ -21,5 +21,6 @@ PG_DATA: "/var/lib/pgsql/10/data"
 PG_ETC: "{{PG_DATA}}"
 PG_BIN: "/usr/pgsql-{{PG_VERSION}}/bin"
 PG_LOG: "/{{PG_DATA}}/pg_log"
+PG_PORT: 5432
 REPO_PKG: "https://download.postgresql.org/pub/repos/yum/10/redhat/rhel-7-x86_64/pgdg-centos10-10-2.noarch.rpm"
 LOCAL_REPO_URL: "http://repo.mibifi.com/pgdg10"
