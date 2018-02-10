@@ -13,7 +13,7 @@
 
 - name: clone from master
   become_user: postgres
-  command: "{{PG_BIN}}/repmgr -h {{play_hosts[0]|lower}} -U repmgr -d repmgr -f {{repmgr_conf}} standby clone"
+  command: "{{PG_BIN}}/repmgr -h {{play_hosts|join(',')}} -U repmgr -d repmgr -f {{repmgr_conf}} standby clone"
   args:
     creates: "{{PG_DATA}}/PG_VERSION"
   ignore_errors: true

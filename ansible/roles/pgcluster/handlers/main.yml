@@ -27,7 +27,7 @@
 
 - name: register standby
   become_user: postgres
-  shell: "{{PG_BIN}}/repmgr -f {{repmgr_conf}} standby register"
+  shell: "{{PG_BIN}}/repmgr -f {{repmgr_conf}} standby register --force"
   register: register_standby
   until: register_standby.rc ==0
   retries: 5
