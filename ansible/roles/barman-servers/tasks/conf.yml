@@ -9,14 +9,13 @@
   - barman_server
   - conf
 
-- name: barman-client.conf per host
+- name: barman-client.conf for pgcluster
   template:
     src=barman-client.conf
-    dest="{{barman_conf_dir}}/{{hostvars[item].inventory_hostname|lower}}.conf"
+    dest="{{barman_conf_dir}}/{{PG_PORT}}.conf"
     owner=barman
     group=barman
     force=false
-  with_items: "{{groups['barman-clients']}}"
   tags:
   - barman
   - barman_server
@@ -24,7 +23,7 @@
 
 - name: Switch xlog to trigger wal receive
   become_user: barman
-  command: /usr/local/bin/barman switch-xlog all
+  command: "/usr/bin/barman switch-xlog all"
   tags:
   - barman
   - barman_server
@@ -32,7 +31,7 @@
 
 - name: Run barman cron to trigger receive-xlog
   become_user: barman
-  command: /usr/local/bin/barman -q cron
+  command: "/usr/bin/barman -q cron"
   tags:
   - barman
   - barman_server

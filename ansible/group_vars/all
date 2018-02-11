@@ -2,7 +2,7 @@
 ansible_python_interpreter: "/usr/bin/python2"
 
 #barman
-barman_conf_dir: /etc/barman/conf/barman.d
+barman_conf_dir: /etc/barman.d
 barman_wals: /var/barman
 
 #wal

@@ -1,0 +1,18 @@
+---
+# handlers file for ansible/roles/repmgr
+- name: register standby
+  become_user: postgres
+  shell: "{{PG_BIN}}/repmgr -f {{repmgr_conf}} standby register --force"
+  register: register_standby
+  until: register_standby.rc ==0
+  retries: 5
+  delay: 10
+
+- name: register master
+  become_user: postgres
+  shell: "{{PG_BIN}}/repmgr -f {{repmgr_conf}} master register --force"
+  register: register_master
+  until: register_master.rc ==0
+  retries: 5
+  delay: 10
+

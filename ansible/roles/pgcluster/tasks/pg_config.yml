@@ -10,11 +10,10 @@
   - cluster
   - config
 
-- name: wal.conf
+- name: 91_replication.conf
   template:
-    src: 90_wal.conf
-    dest: "{{PG_ETC}}/conf.d/90_wal.conf"
-    force: no
+    src: 91_replication.conf
+    dest: "{{PG_ETC}}/conf.d/91_replication.conf"
     owner: postgres
     group: postgres
   register: walconf
@@ -24,34 +23,14 @@
   - config
   - wal
 
-- name: set wal_archive in wal.conf
-  lineinfile: dest="{{PG_ETC}}/conf.d/90_wal.conf" regexp="^ *wal_log_hints *=" line="wal_log_hints = on"
-  when: not walconf.changed
-  notify: restart postgres
-  tags:
-  - cluster
-  - config
-  - wal
-
-- name: set wal_archive in 90_wal.conf
-  lineinfile: dest="{{PG_ETC}}/conf.d/wal.conf" regexp="^ *wal_keep_segments *=" line="wal_keep_segments = {{wal_keep_segments}}"
-  when: not walconf.changed and PG_VERSION != 9.6
-  notify: restart postgres
-  tags:
-  - cluster
-  - config
-  - wal
-
 - name: pg_hba.conf
   pg_hba: 
-    databases="{{item[0]}}" 
+    databases="replication,repmgr"
     users=repmgr 
-    source="{{hostvars[item[1]].ansible_default_ipv4.address}}/32"
+    source="{{hostvars[item].ansible_default_ipv4.address}}/32"
     method=trust
     dest="{{PG_ETC}}/pg_hba.conf"
-  with_nested:
-    - [ replication, repmgr ]
-    - "{{play_hosts}}"
+  with_items: "{{play_hosts}}"
   register: pg_hbaconf
   notify: reload postgres
   tags:

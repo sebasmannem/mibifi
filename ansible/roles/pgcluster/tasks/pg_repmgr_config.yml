@@ -19,16 +19,8 @@
   become_user: postgres
   postgresql_db: name=repmgr owner=repmgr state=present
   register: createrepmgrdb
+  notify: register master
   tags:
   - cluster
   - repmgr
   - db
-
-- name: register master
-  become_user: postgres
-  shell: "{{PG_BIN}}/repmgr -f {{repmgr_conf}} master register"
-  when: createrepmgrdb|changed
-  tags:
-  - cluster
-  - repmgr
-  - register

@@ -1,5 +1,11 @@
 - name: install package
-  package: name="barman,postgres-{{PG_VERSION}}-client"
+  yum:
+    name: "{{item}}"
+    disable_gpg_check: true
+  with_items:
+    - epel-release
+    - "postgresql{{PG_VERSION}}"
+    - barman
   tags:
   - barman
   - barman_server

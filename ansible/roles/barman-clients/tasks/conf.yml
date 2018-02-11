@@ -8,39 +8,20 @@
   with_nested:
     - "{{groups['barman-servers']}}"
     - [ replication, postgres ]
-  register: pg_hbaconf
+  notify: reload postgres
   tags:
   - barman
   - barman_client
   - pg_hba
 
-- name: wal.conf
-  template: src=wal.conf dest="{{PG_ETC}}/conf.d/wal.conf" force=no owner=postgres group=postgres
+- name: 90_backup.conf
+  template: src=90_backup.conf dest="{{PG_ETC}}/conf.d/90_backup.conf" force=no owner=postgres group=postgres
   register: walconf
+  notify: restart postgres
   tags:
   - barman
   - barman_client
   - conf
 
-- name: set wal_archive in wal.conf
-  lineinfile: dest="{{PG_ETC}}/conf.d/wal.conf" regexp='wal_level *= *' line="wal_level = 'archive'"
-  when: not walconf.changed
-  tags:
-  - barman
-  - barman_client
-  - conf
-
-- name: create backup.conf
-  template: src=backup.conf dest="{{PG_ETC}}/conf.d/backup.conf" owner=postgres group=postgres
-  register: backup_conf
-  tags:
-  - barman
-  - barman_client
-  - conf
-
-- name: reload or restart postgres
-  service: name=postgres state='{% if backup_conf.changed %}restarted{% else %}reloaded{% endif %}'
-  tags:
-  - barman
-  - barman_client
-  - conf
+- name: force all notified handlers to run at this point, not waiting for normal sync points
+  meta: flush_handlers
