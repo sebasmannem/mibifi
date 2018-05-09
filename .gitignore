@@ -1,2 +1,3 @@
 *.retry
 docker/*/id_rsa*
+ansible/ansible_fact_cache/
