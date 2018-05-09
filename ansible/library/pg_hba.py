@@ -22,8 +22,9 @@ module: pg_hba
 short_description: Adds, removes or modifies an rule in a pg_hba file.
 description:
    - The fundamental function of the module is to create, or delete lines in pg_hba files.
-   - The lines in the file should be in a typical pg_hba form and lines should be unique per key (type, databases, users, source).
-     If they are not unique and the SID is 'the one to change', only one (for present) or no (for absent) of the SID's will remain.
+   - The lines in the file should be in a typical pg_hba form and lines should be unique per key
+     (type, databases, users, source). If they are not unique and the SID is 'the one to change',
+     only one (for present) or no (for absent) of the SID's will remain.
 version_added: "2.2"
 options:
   dest:
@@ -60,7 +61,8 @@ options:
     default: 640
   contype:
     description:
-      - type of the rule. Use emptystring if you don't want to change file, but only want to read contents.
+      - type of the rule. Use emptystring if you don't want to change file, but only want to read
+        contents.
     required: true
     default: "host"
     choises: [ "local", "host", "hostssl", "hostnossl", "" ]
@@ -177,15 +179,15 @@ def ipv4_to_int(ip):
         ip_ar = ip.split(".")
         if len(ip_ar) != 4:
             raise IPError("Invalid IP: {0}. We need 4 numbers in an IP".format(ip))
-        ip=0
+        ip = 0
         for i in ip_ar:
             try:
-                i=int(i)
+                i = int(i)
             except:
                 raise IPError("IP part {0} must be numeric".format(i))
-            if i<0 or i>255:
+            if i < 0 or i > 255:
                 raise IPError("IP part {0} must be from 0-255".format(i))
-            ip=ip*256+i
+            ip = ip * 256 + i
         return ip
     else:
         raise IPError("{0} has an invalid type for an IP.".format(ip.__repr__()))
@@ -200,35 +202,36 @@ def int_to_ipv4(i):
         ip.append(str(int(i/2**(8*(3-x)) % 256)))
     return '.'.join(ip)
 
+
 def prefix_to_ipv4netmask(base):
-    if type(base) is str:
-        base=base.replace('/','')
+    if isinstance(base, str):
+        base = base.replace('/', '')
     try:
-        base=int(base)
-    except:
+        base = int(base)
+    except Exception:
         raise IPError("invalid numeric expression for ipv4 network base {}".format(base))
-    return int_to_ipv4((2**base-1) * 2** (32-base))
+    return int_to_ipv4((2 ** base - 1) * 2 ** (32 - base))
 
 def ipv6_to_int(ip):
     normalized = ip
     if '.' in normalized:
-        #Normalize: Replace ipv4 part for ipv6 equivalent
-        m = ipv4part_re.search(normalized)
-        ipv6part = ''.join('%02x'%int(i) for i in m.group(0).split('.'))
+        # Normalize: Replace ipv4 part for ipv6 equivalent
+        matches = ipv4part_re.search(normalized)
+        ipv6part = ''.join('%02x' % int(i) for i in matches.group(0).split('.'))
         ipv6part = ipv6part[:4] + ':' + ipv6part[4:]
-        normalized = normalized.replace(m.group(0), ipv6part)
+        normalized = normalized.replace(matches.group(0), ipv6part)
     if '::' in ip:
-        #Normalize: Replace :: for correct number of 0000 parts
+        # Normalize: Replace :: for correct number of 0000 parts
         missing = 9 - normalized.count(':')
         normalized = normalized.replace('::', ":".join(['']+['0000']*missing+['']))
         normalized.strip(':')
-        normalized = normalized.replace('::',':')
+        normalized = normalized.replace('::', ':')
     parts = normalized.split(':')
     if len(parts) < 8:
         raise IPError('IPv6 seems to consist of too less parts')
     elif len(parts) > 8:
         raise IPError('IPv6 seems to consist of too much parts')
-    #Normalize: Every part should have 4 digits
+    # Normalize: Every part should have 4 digits
     for i in range(parts):
         if len(parts[i]) != 4:
             part = '0000' + parts[i]
@@ -295,22 +298,35 @@ IPV4ADDR  = '('+IPV4SEG+'\.){3,3}'+IPV4SEG
 
 IPV6SEG   = '[0-9a-fA-F]{1,4}'
 
-IPV6ADDR  = '(('+IPV6SEG+':){7,7}'+IPV6SEG+'|'           # 1:2:3:4:5:6:7:8
-IPV6ADDR += '('+IPV6SEG+':){1,7}:|'                      # 1::
-IPV6ADDR += '('+IPV6SEG+':){1,6}:'+IPV6SEG+'|'           # 1::8               1:2:3:4:5:6::8   1:2:3:4:5:6::8
-IPV6ADDR += '('+IPV6SEG+':){1,5}(:'+IPV6SEG+'){1,2}|'    # 1::7:8             1:2:3:4:5::7:8   1:2:3:4:5::8
-IPV6ADDR += '('+IPV6SEG+':){1,4}(:'+IPV6SEG+'){1,3}|'    # 1::6:7:8           1:2:3:4::6:7:8   1:2:3:4::8
-IPV6ADDR += '('+IPV6SEG+':){1,3}(:'+IPV6SEG+'){1,4}|'    # 1::5:6:7:8         1:2:3::5:6:7:8   1:2:3::8
-IPV6ADDR += '('+IPV6SEG+':){1,2}(:'+IPV6SEG+'){1,5}|'    # 1::4:5:6:7:8       1:2::4:5:6:7:8   1:2::8
-IPV6ADDR += IPV6SEG+':((:'+IPV6SEG+'){1,6})|'            # 1::3:4:5:6:7:8     1::3:4:5:6:7:8   1::8
-IPV6ADDR += ':((:'+IPV6SEG+'){1,7}|:)|'                  # ::2:3:4:5:6:7:8    ::2:3:4:5:6:7:8  ::8       ::       
-IPV6ADDR += 'fe80:(:'+IPV6SEG+'){0,4}%[0-9a-zA-Z]{1,}|'  # fe80::7:8%eth0     fe80::7:8%1  (link-local IPv6 addresses with zone index)
-IPV6ADDR += '::(ffff(:0{1,4}){0,1}:){0,1}'+IPV4ADDR+'|'  # ::255.255.255.255  ::ffff:255.255.255.255  ::ffff:0:255.255.255.255 (IPv4-mapped IPv6 addresses and IPv4-translated addresses)
-IPV6ADDR += '('+IPV6SEG+':){1,4}:'+IPV4ADDR+')'          # 2001:db8:3:4::192.0.2.33  64:ff9b::192.0.2.33 (IPv4-Embedded IPv6 Address)
+# 1:2:3:4:5:6:7:8
+IPV6ADDR = '((' + IPV6SEG + ':){7,7}' + IPV6SEG + '|'
+# 1::
+IPV6ADDR += '(' + IPV6SEG + ':){1,7}:|'
+# 1::8               1:2:3:4:5:6::8   1:2:3:4:5:6::8
+IPV6ADDR += '(' + IPV6SEG + ':){1,6}:' + IPV6SEG + '|'
+# 1::7:8             1:2:3:4:5::7:8   1:2:3:4:5::8
+IPV6ADDR += '(' + IPV6SEG + ':){1,5}(:' + IPV6SEG + '){1,2}|'
+# 1::6:7:8           1:2:3:4::6:7:8   1:2:3:4::8
+IPV6ADDR += '(' + IPV6SEG + ':){1,4}(:' + IPV6SEG + '){1,3}|'
+# 1::5:6:7:8         1:2:3::5:6:7:8   1:2:3::8
+IPV6ADDR += '(' + IPV6SEG + ':){1,3}(:' + IPV6SEG + '){1,4}|'
+# 1::4:5:6:7:8       1:2::4:5:6:7:8   1:2::8
+IPV6ADDR += '(' + IPV6SEG + ':){1,2}(:' + IPV6SEG + '){1,5}|'
+# 1::3:4:5:6:7:8     1::3:4:5:6:7:8   1::8
+IPV6ADDR += IPV6SEG + ':((:' + IPV6SEG + '){1,6})|'
+# ::2:3:4:5:6:7:8    ::2:3:4:5:6:7:8  ::8       ::
+IPV6ADDR += ':((:' + IPV6SEG + '){1,7}|:)|'
+# fe80::7:8%eth0     fe80::7:8%1  (link-local IPv6 addresses with zone index)
+IPV6ADDR += 'fe80:(:'+IPV6SEG+'){0,4}%[0-9a-zA-Z]{1,}|'
+# ::255.255.255.255  ::ffff:255.255.255.255  ::ffff:0:255.255.255.255 (IPv4-mapped IPv6 addresses
+# and IPv4-translated addresses)
+IPV6ADDR += '::(ffff(:0{1,4}){0,1}:){0,1}' + IPV4ADDR + '|'
+# 2001:db8:3:4::192.0.2.33  64:ff9b::192.0.2.33 (IPv4-Embedded IPv6 Address)
+IPV6ADDR += '('+IPV6SEG+':){1,4}:'+IPV4ADDR+')'
 
-ipv4_re     = re.compile('^\s*'+IPV4ADDR+'(/\d{1,2})?\s*$')
+ipv4_re = re.compile('^\s*' + IPV4ADDR + '(/\d{1,2})?\s*$')
 ipv4part_re = re.compile(IPV4ADDR)
-ipv6_re     = re.compile('^\s*'+IPV6ADDR+'(/\d{1,3})?\s*$')
+ipv6_re = re.compile('^\s*' + IPV6ADDR + '(/\d{1,3})?\s*$')
 ipv6_obs_re = re.compile('(\s|:)(0000:)+')
 
 class PgHbaError(Exception):
@@ -430,8 +446,8 @@ class PgHba(object):
         # For networks, every 1 in 'netmask in binary' makes the subnet more specific.
         # Therefore I chose to use prefix as the weight.
         # So a single IP (/32) should have twice the weight of a /16 network.
-        # To keep everything in the same wieght scale for IPv6, I chose 
-        # - a scale of 0 - 128 from 0 bits to 32 bits for ipv4 and 
+        # To keep everything in the same wieght scale for IPv6, I chose
+        # - a scale of 0 - 128 from 0 bits to 32 bits for ipv4 and
         # - a scale of 0 - 128 from 0 bits to 128 bits for ipv6.
         if rule['type'] == 'local':
             #local is always 'this server' and therefore considered /32
@@ -467,7 +483,7 @@ class PgHba(object):
             elif rule['src'] == 'samehost':
                 srcweight = 128 #(ipv4 /32 is considered equivalent to ipv6 /128)
             elif rule['src'] == 'samenet':
-                #Might write some fancy code to determine all prefix's 
+                #Might write some fancy code to determine all prefix's
                 #from all interfaces and find a sane value for this one.
                 #For now, let's assume /24...
                 srcweight = 96 #(ipv4 /24 is considered equivalent to ipv6 /96)
@@ -538,9 +554,11 @@ class PgHba(object):
 
     def new_rule(self, contype, databases, users, source, netmask, method, options):
         if method not in PgHbaMethods:
-            raise PgHbaError("invalid method {0} (should be one of '{1}').".format(method, "', '".join(PgHbaMethods)))
+            raise PgHbaError("invalid method {0} (should be one of '{1}').".format(
+                method, "', '".join(PgHbaMethods)))
         if contype not in PgHbaTypes:
-            raise PgHbaError("invalid connection type {0} (should be one of '{1}').".format(contype, "', '".join(PgHbaTypes)))
+            raise PgHbaError("invalid connection type {0} (should be one of '{1}').".format(
+                contype, "', '".join(PgHbaTypes)))
         # Add the job
         rule = dict(zip(PgHbaHDR, [contype, databases, users, source, netmask, method, options]))
 
@@ -560,11 +578,27 @@ class PgHba(object):
 
         self.cleanEmptyRuleKeys(rule)
 
-        line = [ rule[k] for k in PgHbaHDR if k in rule.keys() ]
+        line = [rule[k] for k in PgHbaHDR if k in rule.keys()]
         rule['line'] = "\t".join(line)
         return rule
 
     def add_rule(self, rule):
+        if ',' in rule['db']:
+            for db in rule['db'].split(','):
+                new_rule = dict([(key, rule[key]) for key in rule.keys()])
+                new_rule['db'] = db
+                new_rule['line'] = "\t".join([new_rule[k] for k in PgHbaHDR if k in
+                                              new_rule.keys()])
+                self.add_rule(new_rule)
+            return
+        if ',' in rule['usr']:
+            for user in rule['usr'].split(','):
+                new_rule = dict([(key, rule[key]) for key in rule.keys()])
+                new_rule['usr'] = user
+                new_rule['line'] = "\t".join([new_rule[k] for k in PgHbaHDR if k in
+                                              new_rule.keys()])
+                self.add_rule(new_rule)
+            return
         key = self.rule2key(rule)
         try:
             oldrule = self.rules[key]
@@ -592,12 +626,11 @@ class PgHba(object):
             self.changed = True
         except:
             pass
-        
+
     def get_rules(self):
         ret = []
         for k in self.rules.keys():
             rule = self.rules[k]
-            del rule['line']
             ret.append(rule)
         return ret
 
