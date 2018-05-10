@@ -1,9 +1,17 @@
-- name: install package
+---
+- name: install epel
+  yum:
+    name: epel-release
+  tags:
+  - barman
+  - barman_server
+  - packages
+
+- name: install packages
   yum:
     name: "{{item}}"
     disable_gpg_check: true
   with_items:
-    - epel-release
     - "postgresql{{PG_VERSION}}"
     - barman
   tags:
