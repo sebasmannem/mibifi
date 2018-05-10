@@ -54,6 +54,14 @@ ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook /ansible/all.yml -i /ansible/st
 ```
 
 # Cleanup
+```bash
+docker-compose kill && docker-compose rm
+```
+
+# Clean and rerun only necessary
+```bash
+docker-compose kill && docker-compose rm db0{1,2} barman && docker-compose up -d && docker exec -ti mibifi_ansible_1 bash -c 'cd /ansible ; ansible-playbook all.yml'
+```
 
 ## Cleanout docker containers
 
