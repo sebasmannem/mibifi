@@ -11,6 +11,9 @@
   - cluster
   - clone
 
+- name: force all notified handlers to run at this point, not waiting for normal sync points
+  meta: flush_handlers
+
 - name: clone from master
   become_user: postgres
   command: "{{PG_BIN}}/repmgr -h {{play_hosts|join(',')}} -U repmgr -d repmgr -f {{repmgr_conf}} standby clone"
@@ -23,6 +26,3 @@
   tags:
   - cluster
   - clone
-
-- name: force all notified handlers to run at this point, not waiting for normal sync points
-  meta: flush_handlers
