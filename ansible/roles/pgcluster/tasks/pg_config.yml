@@ -25,11 +25,12 @@
 
 - name: pg_hba.conf
   pg_hba: 
-    databases="replication,repmgr"
-    users=repmgr 
-    source="{{hostvars[item].ansible_default_ipv4.address}}/32"
-    method=trust
-    dest="{{PG_ETC}}/pg_hba.conf"
+    databases: "replication,repmgr"
+    users: repmgr
+    source: "{{hostvars[item].ansible_default_ipv4.address}}/32"
+    method: trust
+    dest: "{{PG_ETC}}/pg_hba.conf"
+    contype: host
   with_items: "{{play_hosts}}"
   register: pg_hbaconf
   notify: reload postgres

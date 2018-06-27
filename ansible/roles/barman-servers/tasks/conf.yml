@@ -1,21 +1,24 @@
 - name: barman.conf
   template:
-    src=barman.conf
-    dest="/etc/barman/barman.conf"
-    owner=barman
-    group=barman
+    src: barman.conf
+    dest: "/etc/barman/barman.conf"
+    owner: barman
+    group: barman
   tags:
   - barman
   - barman_server
   - conf
 
+- name: register masters
+  set_fact:
+    clienthosts: "{% for host in groups['barman-clients'] %}{% if not hostvars[host]['is_standby'].stat.exists %}{% if not loop.first %},{% endif %}{{ host }}{% endif %}{% endfor %}"
+
 - name: barman-client.conf for pgcluster
   template:
-    src=barman-client.conf
-    dest="{{barman_conf_dir}}/{{PG_PORT}}.conf"
-    owner=barman
-    group=barman
-    force=false
+    src: barman-client.conf
+    dest: "{{barman_conf_dir}}/{{PG_PORT}}.conf"
+    owner: barman
+    group: barman
   tags:
   - barman
   - barman_server

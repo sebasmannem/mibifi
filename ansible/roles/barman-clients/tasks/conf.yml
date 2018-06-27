@@ -1,10 +1,11 @@
 - name: pg_hba.conf
   pg_hba:
-    databases="{{item[1]}}"
-    users=postgres
-    source="{{hostvars[item[0]].ansible_default_ipv4.address}}/32"
-    method=trust
-    dest="{{PG_ETC}}/pg_hba.conf"
+    contype: host
+    databases: "{{item[1]}}"
+    dest: "{{PG_ETC}}/pg_hba.conf"
+    method: trust
+    source: "{{hostvars[item[0]].ansible_default_ipv4.address}}/32"
+    users: postgres
   with_nested:
     - "{{groups['barman-servers']}}"
     - [ replication, postgres ]
@@ -25,3 +26,7 @@
 
 - name: force all notified handlers to run at this point, not waiting for normal sync points
   meta: flush_handlers
+
+- name: check is standby
+  stat:
+    path: "{{ PG_DATA }}/recovery.conf"

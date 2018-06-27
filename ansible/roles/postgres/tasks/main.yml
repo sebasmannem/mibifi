@@ -2,7 +2,7 @@
 #ip gives ip config to ansible, so that should be installed also
 - name: install package
   yum:
-    name: "postgresql{{PG_VERSION}}-server,python-psycopg2"
+    name: "postgresql{{PG_VERSION}}-server,python-psycopg2,python-ipaddress"
     disable_gpg_check: true
   ignore_errors: yes
   tags:
